@@ -1,3 +1,14 @@
+/*
+TODO:
+Figure out how I would like to sense motion upon detection or just act as a full time camera taking pictures at a set rate and displaying that feed to the server
+
+Also need to figure out if I want to store any of the data and if I do how to do that properly. Do I want to do a read/write/delete overflow scheme or have a function 
+that saves only the pictures I want to save? 
+
+For now I think I will keep it as a kind of CCTV live cam (shitty cctv) and perhaps send the jpg's to another computer to store at mass later after 
+I make a cover for it so it can go outside and figure out if I want it to run of battery/solar/or wired. 
+*/
+
 //GPT-o1 Skeleton
 #include "esp_camera.h"
 #include <WiFi.h>
@@ -5,8 +16,8 @@
 #include <ESPmDNS.h>  // Include the mDNS library
 
 // Replace these with your WiFi credentials
-const char* ssid = "World Wide Web";
-const char* password = "ablecapital114";
+const char* ssid = "Your_WIFI";
+const char* password = "Your_PASSWORD";
 
 // Camera configuration for ESP32-CAM
 #define PWDN_GPIO_NUM    32
@@ -104,15 +115,10 @@ void loop() {
 // Function to start the camera web server
 void startCameraServer() {
   // Handler for the root URL "/"
-  server.on("/", HTTP_GET, []() {
-    String html = "<html><head><title>ESP32-CAM</title>";
-    html += "<meta http-equiv='refresh' content='15' />";  // Refresh every 5 seconds
-    html += "</head><body>";
-    html += "<h1>ESP32-CAM Image</h1>";
-    html += "<img src='/capture' />";
-    html += "</body></html>";
+server.on("/", HTTP_GET, []() {
+    String html = "<html><head><title>ESP32-CAM</title> <meta http-equiv='refresh' content='5' /> <style>body{background-color:black; text-align:center;} h1{color: white;}</style> </head><body> <h1>ESP32-CAM Image</h1> <img src='/capture' /> </body></html>";
     server.send(200, "text/html", html);
-  });
+});
 
   // Handler for the image capture URL "/capture"
   server.on("/capture", HTTP_GET, []() {
@@ -141,12 +147,14 @@ void startCameraServer() {
     // Send the image data directly to the client
     size_t bytesSent = 0;
     while (bytesSent < fb->len) {
-      size_t chunkSize = client.write(fb->buf + bytesSent, fb->len - bytesSent);
+      size_t chunkSize = client.write(fb->buf + bytesSent, fb->len - bytesSent);//if chunk size is bigger than packet send it will send the max and subtract that from the total fb to send the rest of the fb after the first
       if (chunkSize == 0) {
         Serial.println("Failed to send image data");
         break;
-      }
+      } 
       bytesSent += chunkSize;
+      Serial.print("Bytes Sent: ");
+      Serial.println(bytesSent);
     }
 
     // Return the frame buffer back to the camera to be reused
