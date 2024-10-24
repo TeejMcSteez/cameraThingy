@@ -5,8 +5,8 @@
 #include <ESPmDNS.h>  // Include the mDNS library
 
 // Replace these with your WiFi credentials
-const char* ssid = "World Wide Web";
-const char* password = "ablecapital114";
+const char* ssid = "WIFI";
+const char* password = "password";
 
 // Camera configuration for ESP32-CAM
 #define PWDN_GPIO_NUM    32
